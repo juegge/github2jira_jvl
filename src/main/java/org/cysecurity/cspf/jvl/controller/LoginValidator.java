@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import org.cysecurity.cspf.jvl.model.DBConnect;
+import java.sql.PreparedStatement
  
  
 
@@ -47,9 +48,14 @@ public class LoginValidator extends HttpServlet {
                  Connection con=new DBConnect().connect(getServletContext().getRealPath("/WEB-INF/config.properties"));
                     if(con!=null && !con.isClosed())
                                {
-                                   ResultSet rs=null;
-                                   Statement stmt = con.createStatement();  
-                                   rs=stmt.executeQuery("select * from users where username='"+user+"' and password='"+pass+"'");
+                                   //Statement stmt = con.createStatement();
+                                    //Sanitized User and Password
+                                   String sql = "select * from users where username=? and password=?";
+                                   PreparedStatement preparedStatement = con.prepareStatement(sql);
+                                    // rs=stmt.executeQuery("select * from users where username='"user"' and password='"pass"'"
+                                   preparedStatement.setString(1,user);
+                                   preparedStatement.setString(2,pass);
+                                   ResultSet rs = preparedStatement.executeQuery();
                                    if(rs != null && rs.next()){
                                    HttpSession session=request.getSession();
                                    session.setAttribute("isLoggedIn", "1");
